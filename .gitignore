@@ -1,0 +1,6 @@
+instructions.md
+telecom.db
+venv
+__pycache__
+telemetry.log
+telecom.db-journal
