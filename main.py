@@ -10,28 +10,21 @@ from logger_setup import logger, request_id_var
 from pydantic import BaseModel
 from typing import Optional
 
+import sim_models
+from sim_router import router as sim_api_router
+
 models.Base.metadata.create_all(bind=engine)
+sim_models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+app.include_router(sim_api_router)
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     trace_id = str(uuid.uuid4())
     request_id_var.set(trace_id)
     
-    body = await request.body()
-    async def receive():
-        return {"type": "http.request", "body": body}
-    request._receive = receive
-    
-    payload = None
-    if body:
-        try:
-            payload = json.loads(body)
-        except:
-            payload = "Non-JSON payload or parsing error"
-
-    logger.info(f"Incoming Request: {request.method} {request.url} | Payload: {json.dumps(payload)}")
+    logger.info(f"Incoming Request: {request.method} {request.url}")
     
     response = await call_next(request)
     
