@@ -9,13 +9,18 @@ class TraceIdFilter(logging.Filter):
         record.trace_id = request_id_var.get()
         return True
 
+class StackTraceFormatter(logging.Formatter):
+    def formatException(self, exc_info):
+        result = super().formatException(exc_info)
+        return f"\n--- STACK TRACE ---\n{result}\n-------------------"
+
 def setup_logger():
     logger = logging.getLogger("telemetry_logger")
     if not logger.handlers:
         logger.setLevel(logging.DEBUG)
         handler = logging.FileHandler("telemetry.log")
         handler.addFilter(TraceIdFilter())
-        formatter = logging.Formatter(
+        formatter = StackTraceFormatter(
             '%(asctime)s - %(name)s - %(levelname)s - TraceID: %(trace_id)s - %(message)s'
         )
         handler.setFormatter(formatter)

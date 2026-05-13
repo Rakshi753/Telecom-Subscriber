@@ -12,12 +12,16 @@ from typing import Optional
 
 import sim_models
 from sim_router import router as sim_api_router
+import billing_models
+from billing_router import router as billing_api_router
 
 models.Base.metadata.create_all(bind=engine)
 sim_models.Base.metadata.create_all(bind=engine)
+billing_models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 app.include_router(sim_api_router)
+app.include_router(billing_api_router)
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -26,11 +30,21 @@ async def log_requests(request: Request, call_next):
     
     logger.info(f"Incoming Request: {request.method} {request.url}")
     
-    response = await call_next(request)
-    
-    logger.info(f"Outgoing Response: {request.method} {request.url} | Status: {response.status_code}")
-    
-    return response
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        
+        if status_code == 422:
+            logger.warning(f"Outgoing Response: {request.method} {request.url} | Status: {status_code} | Validation Error")
+        elif status_code >= 500:
+            logger.error(f"Outgoing Response: {request.method} {request.url} | Status: {status_code} | Internal Server Error")
+        else:
+            logger.info(f"Outgoing Response: {request.method} {request.url} | Status: {status_code}")
+            
+        return response
+    except Exception as e:
+        logger.error(f"Outgoing Response: {request.method} {request.url} | Status: 500 | Exception: {str(e)}", exc_info=True)
+        raise
 
 class SubscriberCreate(BaseModel):
     name: str
