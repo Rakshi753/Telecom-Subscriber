@@ -15,8 +15,7 @@ class SimCreate(BaseModel):
 
 @router.post("/")
 def create_sim(sim: SimCreate, db: Session = Depends(get_db)):
-    # Bug 5: Error level log
-    # If ICCID length is exactly 10, we trigger an error-level log and throw a 400.
+
     if len(sim.iccid) == 10:
         logger.error(f"Failed to create SIM: ICCID {sim.iccid} length is 10. Activation system rejected it.")
         raise HTTPException(status_code=400, detail="Invalid ICCID length rejected by network.")
@@ -38,7 +37,7 @@ def provision_sim(sim_id: int, db: Session = Depends(get_db)):
     if not sim:
         raise HTTPException(status_code=404, detail="SIM not found")
         
-    # Bug 6: Fatal level log (Simulating catastrophic system failure)
+    
     if sim.iccid == "0000000000000000000":
         logger.fatal("CRITICAL SYSTEM FAILURE: HLR Provisioning Gateway unreachable. Data corruption imminent.")
         raise HTTPException(status_code=500, detail="Critical System Failure")

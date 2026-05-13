@@ -56,11 +56,11 @@ if st.button("Search"):
 st.header("Update Plan Quota")
 with st.form("update_plan"):
     update_id = st.number_input("Subscriber ID to Update", min_value=1, value=1)
-    # Bug 2: Streamlit UI sends quota_gb as a string
+
     quota_gb_input = st.text_input("New Quota (GB)", value="10")
     submit_update = st.form_submit_button("Update")
     if submit_update:
-        # Intentionally passing string to trigger 422 in FastAPI
+        
         payload = {"quota_gb": quota_gb_input + " GB"} 
         try:
             res = requests.put(f"{API_URL}/subscribers/{update_id}/plan", json=payload)

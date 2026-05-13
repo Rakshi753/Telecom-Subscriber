@@ -26,8 +26,7 @@ def refund_invoice(invoice_id: int, db: Session = Depends(get_db)):
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
         
-    # Bug 7: Configuration Error (Missing Environment Variable)
-    # Trying to connect to payment gateway but URL is not configured
+    
     gateway_url = os.getenv("PAYMENT_GATEWAY_URL")
     if not gateway_url:
         logger.error("Failed to process refund: PAYMENT_GATEWAY_URL is not configured.")
@@ -39,10 +38,10 @@ def refund_invoice(invoice_id: int, db: Session = Depends(get_db)):
 
 @router.delete("/invoices/{invoice_id}")
 def delete_invoice(invoice_id: int, authorization: str = Header(None), db: Session = Depends(get_db)):
-    # Bug 8: Logic flaw - Missing return statement in authorization check
+    
     if authorization != "Bearer ADMIN_TOKEN":
         logger.warning(f"Unauthorized deletion attempt for invoice {invoice_id}")
-        # Intentional bug: forgot to return/raise here, so it continues to delete!
+        
     
     invoice = db.query(billing_models.Invoice).filter(billing_models.Invoice.id == invoice_id).first()
     if invoice:

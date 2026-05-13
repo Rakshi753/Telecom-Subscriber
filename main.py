@@ -55,7 +55,7 @@ class PlanUpdate(BaseModel):
     quota_gb: int
 
 def call_vendor_provisioning_api():
-    """Bug 3: Latency - 1 in 3 chance of 10s sleep"""
+    
     if random.choice([True, False, False]):
         logger.warning("Vendor API experiencing delays...")
         time.sleep(10)
@@ -76,7 +76,7 @@ def read_subscriber(sub_id: int, db: Session = Depends(get_db)):
     if not subscriber:
         raise HTTPException(status_code=404, detail="Subscriber not found")
     
-    # Bug 4 (Null Reference): Attempt to access subscriber.plan.name even if plan is None
+   
     plan_name = subscriber.plan.name
     
     return {
@@ -99,7 +99,7 @@ def update_subscriber_plan(sub_id: int, plan: PlanUpdate, db: Session = Depends(
 
 @app.delete("/subscribers/{sub_id}")
 def deactivate_subscriber(sub_id: int):
-    # Bug 1 (Concurrency): open a DB transaction but omit session.close()/commit()
+    
     dangling_db = SessionLocal()
     subscriber = dangling_db.query(models.Subscriber).filter(models.Subscriber.id == sub_id).first()
     if subscriber:

@@ -4,3 +4,4 @@ venv
 __pycache__
 telemetry.log
 telecom.db-journal
+generate_faker_logs.py
