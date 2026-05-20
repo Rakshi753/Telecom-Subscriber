@@ -14,14 +14,18 @@ import sim_models
 from sim_router import router as sim_api_router
 import billing_models
 from billing_router import router as billing_api_router
+import ticket_models
+from ticket_router import router as ticket_api_router
 
 models.Base.metadata.create_all(bind=engine)
 sim_models.Base.metadata.create_all(bind=engine)
 billing_models.Base.metadata.create_all(bind=engine)
+ticket_models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 app.include_router(sim_api_router)
 app.include_router(billing_api_router)
+app.include_router(ticket_api_router)
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
